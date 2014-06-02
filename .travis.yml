@@ -1,21 +1,21 @@
 language:
-    - cpp
+    - objective-c
 
 env:
-    - TOOLCHAIN=default
-    - TOOLCHAIN=libcxx
-    - TOOLCHAIN=clang-libstdcxx
-    - TOOLCHAIN=gcc
-    - TOOLCHAIN=gcc48
-    - TOOLCHAIN=analyze
-    - TOOLCHAIN=sanitize_address
-    - TOOLCHAIN=sanitize_leak
-    - TOOLCHAIN=sanitize_memory
-    - TOOLCHAIN=sanitize_thread
+    - TOOLCHAIN="default"
+    - TOOLCHAIN="libcxx"
+    - TOOLCHAIN="clang_libstdcxx"
+    - TOOLCHAIN="xcode" GENERATOR="-GXcode"
+    - TOOLCHAIN="gcc"
+    - TOOLCHAIN="gcc48"
+    - TOOLCHAIN="ios-nocodesign" GENERATOR="-GXcode" EXTRA_BUILD="-arch i386 -sdk iphonesimulator"
+    - TOOLCHAIN="analyze"
+    - TOOLCHAIN="sanitize_address"
 
 install:
-    - sudo apt-get install cmake
-    - sudo apt-get install libcurl3-dev
+    - brew install cmake
+    - brew install python3
+
     # install cmake
     - CMAKE_VERSION="3.0.0-rc5_ios-universal"
     - wget https://github.com/ruslo/CMake/archive/v${CMAKE_VERSION}.tar.gz
@@ -23,7 +23,7 @@ install:
     - tar xf v${CMAKE_VERSION}.tar.gz
     - cmake -HCMake-${CMAKE_VERSION} -B_builds-cmake -DCMAKE_USE_SYSTEM_CURL=YES -DCMAKE_BUILD_TYPE=Release
     - cmake --build _builds-cmake
-    - sudo cmake --build _builds-cmake --target install
+    - cmake --build _builds-cmake --target install
     # -- end
     # verify installed cmake
     - which cmake
@@ -35,9 +35,10 @@ install:
     - tar xf v${POLLY_VERSION}.tar.gz
     - export POLLY_ROOT=`pwd`/polly-${POLLY_VERSION}
     # -- end
+    - export XCODE_XCCONFIG_FILE="${POLLY_ROOT}/scripts/NoCodeSign.xcconfig"
 
 script:
-    - cmake -H. -B_builds -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} -DCMAKE_VERBOSE_MAKEFILE=ON
-    - cmake --build _builds
+    - cmake -H. -B_builds -DCMAKE_TOOLCHAIN_FILE=${POLLY_ROOT}/${TOOLCHAIN}.cmake -DCMAKE_VERBOSE_MAKEFILE=ON ${GENERATOR}
+    - cmake --build _builds --use-stderr -- ${EXTRA_BUILD}
     - cd _builds
-    - ctest -VV -C ${BUILD_TYPE}
+    - ctest -VV
