@@ -2,43 +2,42 @@ language:
     - objective-c
 
 env:
-    - TOOLCHAIN="default"
-    - TOOLCHAIN="libcxx"
-    - TOOLCHAIN="clang_libstdcxx"
-    - TOOLCHAIN="xcode" GENERATOR="-GXcode"
-    - TOOLCHAIN="gcc"
-    - TOOLCHAIN="gcc48"
-    - TOOLCHAIN="ios-nocodesign" GENERATOR="-GXcode" EXTRA_BUILD="-arch i386 -sdk iphonesimulator"
-    - TOOLCHAIN="analyze"
-    - TOOLCHAIN="sanitize_address"
+    - TOOLCHAIN=default
+    - TOOLCHAIN=libcxx
+    - TOOLCHAIN=clang_libstdcxx
+    - TOOLCHAIN=xcode
+    - TOOLCHAIN=gcc
+    - TOOLCHAIN=ios-nocodesign EXTRA="--iossim"
+    - TOOLCHAIN=analyze
+    - TOOLCHAIN=sanitize_address
 
 install:
     - brew install cmake
     - brew install python3
-
+    # install cmake toolchains
+    - POLLY_VERSION="0.4.4"
+    - wget "https://github.com/ruslo/polly/archive/v${POLLY_VERSION}.tar.gz"
+    - tar xf "v${POLLY_VERSION}.tar.gz"
+    - export POLLY_ROOT="`pwd`/polly-${POLLY_VERSION}"
+    - export PATH="${POLLY_ROOT}/bin:${PATH}"
+    # -- end
     # install cmake
     - CMAKE_VERSION="3.0.0-rc5_ios-universal"
-    - wget https://github.com/ruslo/CMake/archive/v${CMAKE_VERSION}.tar.gz
-    - openssl sha1 v${CMAKE_VERSION}.tar.gz
-    - tar xf v${CMAKE_VERSION}.tar.gz
-    - cmake -HCMake-${CMAKE_VERSION} -B_builds-cmake -DCMAKE_USE_SYSTEM_CURL=YES -DCMAKE_BUILD_TYPE=Release
-    - cmake --build _builds-cmake
-    - cmake --build _builds-cmake --target install
+    - wget "https://github.com/ruslo/CMake/archive/v${CMAKE_VERSION}.tar.gz"
+    - openssl sha1 "v${CMAKE_VERSION}.tar.gz"
+    - tar xf "v${CMAKE_VERSION}.tar.gz"
+    - cd "CMake-${CMAKE_VERSION}"
+    -   build.py --install --toolchain default --config Release --fwd "CMAKE_USE_SYSTEM_CURL=YES"
+    -   export PATH="`pwd`/_install/default/bin:${PATH}"
+    - cd ..
     # -- end
     # verify installed cmake
     - which cmake
     - cmake --version
     # -- end
-    # install cmake toolchains
-    - POLLY_VERSION="0.3.1"
-    - wget https://github.com/ruslo/polly/archive/v${POLLY_VERSION}.tar.gz
-    - tar xf v${POLLY_VERSION}.tar.gz
-    - export POLLY_ROOT=`pwd`/polly-${POLLY_VERSION}
-    # -- end
+    # https://github.com/ruslo/polly/wiki/Toolchain-list#ios-nocodesign
     - export XCODE_XCCONFIG_FILE="${POLLY_ROOT}/scripts/NoCodeSign.xcconfig"
+    # -- end
 
 script:
-    - cmake -H. -B_builds -DCMAKE_TOOLCHAIN_FILE=${POLLY_ROOT}/${TOOLCHAIN}.cmake -DCMAKE_VERBOSE_MAKEFILE=ON ${GENERATOR}
-    - cmake --build _builds --use-stderr -- ${EXTRA_BUILD}
-    - cd _builds
-    - ctest -VV
+    - build.py --toolchain ${TOOLCHAIN} --verbose --test ${EXTRA}
