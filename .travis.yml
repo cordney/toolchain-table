@@ -4,14 +4,16 @@ language:
     - objective-c
 
 env:
-    - TOOLCHAIN=default
-    - TOOLCHAIN=libcxx
-    - TOOLCHAIN=clang_libstdcxx
-    - TOOLCHAIN=xcode
-    - TOOLCHAIN=gcc
+    - TOOLCHAIN=default TEST="--test"
+    - TOOLCHAIN=libcxx TEST="--test"
+    - TOOLCHAIN=clang_libstdcxx TEST="--test"
+    - TOOLCHAIN=xcode TEST="--test"
+    - TOOLCHAIN=gcc TEST="--test"
     - TOOLCHAIN=ios-nocodesign EXTRA="--iossim"
-    - TOOLCHAIN=analyze
-    - TOOLCHAIN=sanitize_address
+        # Extra cmake modules needed for iOS testing:
+        # * https://github.com/ruslo/sugar/tree/master/cmake/core#sugar_add_ios_gtest
+    - TOOLCHAIN=analyze TEST="--test"
+    - TOOLCHAIN=sanitize_address TEST="--test"
 
 install:
     - brew install cmake
