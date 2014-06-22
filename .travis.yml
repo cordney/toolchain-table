@@ -13,7 +13,6 @@ env:
         # Extra cmake modules needed for iOS testing:
         # * https://github.com/ruslo/sugar/tree/master/cmake/core#sugar_add_ios_gtest
     - TOOLCHAIN=analyze TEST="--test"
-    - TOOLCHAIN=sanitize_address TEST="--test"
 
 install:
     - brew install cmake
