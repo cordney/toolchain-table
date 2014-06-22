@@ -1,3 +1,5 @@
+# Mac OS X (https://github.com/travis-ci-tester/toolchain-table)
+
 language:
     - objective-c
 
@@ -14,7 +16,7 @@ env:
 install:
     - brew install cmake
     - brew install python3
-    # install cmake toolchains
+    # install cmake toolchains and script
     - POLLY_VERSION="0.4.4"
     - wget "https://github.com/ruslo/polly/archive/v${POLLY_VERSION}.tar.gz"
     - tar xf "v${POLLY_VERSION}.tar.gz"
@@ -22,7 +24,7 @@ install:
     - export PATH="${POLLY_ROOT}/bin:${PATH}"
     # -- end
     # install cmake
-    - CMAKE_VERSION="3.0.0-rc5_ios-universal"
+    - CMAKE_VERSION="3.0.0-ios-universal"
     - wget "https://github.com/ruslo/CMake/archive/v${CMAKE_VERSION}.tar.gz"
     - openssl sha1 "v${CMAKE_VERSION}.tar.gz"
     - tar xf "v${CMAKE_VERSION}.tar.gz"
